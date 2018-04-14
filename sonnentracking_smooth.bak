@@ -1,0 +1,135 @@
+// Initialisieren
+void setup(){
+  if(debug>0){
+    // Wenn Debugmodus, dann initialsiere Datenausgabe
+    Serial.begin(57600);
+  } // Ende Debug
+  // Verbinde Schalterpins
+  pinMode(east_SWPIN, INPUT);
+  pinMode(west_SWPIN, INPUT);
+  // Verbinde Motorpins
+  pinMode(motor_EW, OUTPUT);
+  pinMode(motor_EW_Reverse, OUTPUT);
+  pinMode(motor_NS, OUTPUT);
+  pinMode(motor_NS_Reverse, OUTPUT);
+  // Setze initial auf LOW
+  digitalWrite(motor_EW, LOW);
+  digitalWrite(motor_EW_Reverse, LOW);
+  digitalWrite(motor_NS, LOW);
+  digitalWrite(motor_NS_Reverse, LOW);
+} // Ende Setup
+
+void loop(){
+  // Einlesen der Sensoren
+  west_SWPIN = digitalRead(east_SWPIN);
+  east_Sensor = analogRead(east_Pin);
+  south_Sensor = analogRead(south_Pin);
+  west_Sensor = analogRead(west_Pin);
+  north_Sensor = analogRead(north_Pin);
+
+
+ // if (digitalRead(west_SWPIN)==HIGH) {
+ //   digitalWrite(motor_EW, HIGH);
+    // while(position_EW >0); }
+//}
+  
+//  else {
+ //   digitalWrite(motor_EW, LOW);
+      
+// }
+
+  // Debug Modus 
+  if(debug > 0){
+    Serial.println();
+    Serial.print(east_Sensor);
+    Serial.println();
+    Serial.print(west_Sensor);
+    Serial.println();
+    Serial.print(south_Sensor);
+    Serial.println();
+    Serial.print(north_Sensor); 
+    Serial.println();
+    Serial.print(position_EW);
+    Serial.println();
+    Serial.print(position_NS);
+    Serial.println();
+  } // Ende Debug
+
+  // Prüfe, ob Nacht
+  if(east_Sensor > schwellwert && south_Sensor > schwellwert && west_Sensor > schwellwert && north_Sensor > schwellwert){
+    // Verfahre auf Null
+    while(position_EW > 0 || position_NS > 0){
+      // Schalte Motor Ost - West ein, wenn nicht nullstellung
+
+      // Debug Mode
+      if(debug>0){
+        Serial.println();
+        Serial.print(position_EW);
+        Serial.println();
+        Serial.print(position_NS);
+        Serial.println();
+      }// Ende Debug
+
+      if(position_EW > 0){
+        // Schalte Motor ein
+
+        // Reduziere anliegende Position
+        position_EW--;
+      } 
+      else {
+        // Schalte Motor aus
+        digitalWrite(motor_EW, HIGH);
+        digitalWrite(motor_EW_Reverse, HIGH);
+      } // Ende Motor Ost - West
+
+      // SChalte Motor Nord - Süd wenn nicht nullstellung
+      if(position_NS > 0){
+        digitalWrite(motor_NS, LOW);
+        digitalWrite(motor_NS_Reverse, HIGH);
+        position_NS--;
+      } 
+      else {
+        digitalWrite(motor_NS, HIGH);
+        digitalWrite(motor_NS_Reverse, HIGH);
+      } // Ende Motor Nord Süd
+      delay(motorZeit);      
+    } // Ende While Schleife für Verfahren
+  } // Ende Nacht
+
+    // Tagverfahrmodus
+
+  // Prüfe ob Osuedten - West Verhältnis
+  if(east_Sensor - west_Sensor > abweichung && position_EW > 0){
+    digitalWrite(motor_EW, LOW);
+    digitalWrite(motor_EW_Reverse, HIGH);
+    position_EW--;   
+  } 
+  else if(west_Sensor - east_Sensor > abweichung && position_EW < 100){
+    digitalWrite(motor_EW, HIGH);
+    digitalWrite(motor_EW_Reverse, LOW);
+    position_EW++;
+  } 
+  else {
+    digitalWrite(motor_EW, HIGH);
+    digitalWrite(motor_EW_Reverse, HIGH);
+  }// Ende Osten größer Westen
+  // delay(motorZeit);
+  // Prüfe Nord sued
+  if(south_Sensor - north_Sensor > abweichung && position_NS > 0){
+    digitalWrite(motor_NS, HIGH);
+    digitalWrite(motor_NS_Reverse, LOW);
+    position_NS--;   
+  } 
+  else if(north_Sensor - south_Sensor > abweichung && position_NS < 100){
+    digitalWrite(motor_NS, LOW);
+    digitalWrite(motor_NS_Reverse, HIGH);
+    position_NS++;
+  } 
+  else {
+    digitalWrite(motor_NS, HIGH);
+    digitalWrite(motor_NS_Reverse, HIGH);
+  }// Ende Norden Süd
+  delay(motorZeit);
+} // Ende loop
+
+
