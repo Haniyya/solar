@@ -38,7 +38,7 @@ void loop(){
       
 // }
 
-  // Debug Modus 
+  // Debug Modus
   if(debug > 0){
     Serial.println();
     Serial.print(east_Sensor);

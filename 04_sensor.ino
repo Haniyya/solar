@@ -3,16 +3,16 @@ enum SensorStatus { darker, unchanged, lighter };
 class Sensor {
   // Benötigte PINS
   // Für einlesen der Spannungen
-  int final east_pin  = 2; // grün
-  int final south_pin = 3; // blau
-  int final west_pin  = 1; // grbl
-  int final north_pin = 0; // braun
+  const int east_pin  = 2; // grün
+  const int south_pin = 3; // blau
+  const int west_pin  = 1; // grbl
+  const int north_pin = 0; // braun
 
   // Tolerance of measurements.
-  int final tolerance = 3;
+  const int tolerance = 3;
 
   // Threshhold for darkness
-  int final darkness = 260;
+  const int darkness = 260;
 
   // Initialisieren der Messwertdarstellung
   // Sensoren zeigen 1000< Messwert für Dunkelheit
@@ -26,7 +26,7 @@ class Sensor {
     SensorStatus east_status();
     SensorStatus north_status();
     boolean is_dark();
-}
+};
 
 void Sensor::update_status() {
   current_east  = analogRead(east_pin);
@@ -62,5 +62,5 @@ boolean Sensor::is_dark() {
   return ((current_east > darkness)
             && (current_west > darkness)
             && (current_south > darkness)
-            && (current_north > darkness))
+            && (current_north > darkness));
 }
