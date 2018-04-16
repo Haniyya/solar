@@ -1,76 +1,43 @@
 class Motor {
-  unsigned long moved_right  = 0;
-  unsigned long moved_up     = 0;
-  // Motor pins
-  const int motor_EW         = 7;
-  const int motor_EW_Reverse = 8;
-  const int motor_NS         = 9;
-  const int motor_NS_Reverse = 10;
+  unsigned long travel = 0;
+  const unsigned long max_travel;
+  const unsigned long min_travel;
+  const int forward_pin;
+  const int reverse_pin;
 
   public:
-    void    set_pins();
-    boolean move_left();
-    boolean move_right();
-    void    rest_ew();
-    boolean move_up();
-    boolean move_down();
-    void    rest_ns();
-    void    move_to_default();
+    Motor(int, int, unsigned long, unsigned long);
+    boolean forward();
+    boolean reverse();
+    boolean rest();
 };
 
-void Motor::rest_ew() {
-  digitalWrite(motor_EW,         LOW);
-  digitalWrite(motor_EW_Reverse, LOW);
-}
+Motor::Motor(int forw, int reve, unsigned long max_t, unsigned long min_t): forward_pin(forw), reverse_pin(reve), max_travel(max_t), min_travel(min_t) { }
 
-void Motor::rest_ns() {
-  digitalWrite(motor_NS,         LOW);
-  digitalWrite(motor_NS_Reverse, LOW);
-}
+  void Motor::init() {
+    pinMode(forw, OUTPUT);
+    pinMode(reve, OUTPUT);
+    rest();
+  }
 
-void Motor::set_pins() {
-  pinMode(motor_EW,         OUTPUT);
-  pinMode(motor_EW_Reverse, OUTPUT);
-  pinMode(motor_NS,         OUTPUT);
-  pinMode(motor_NS_Reverse, OUTPUT);
-  rest_ew();
-  rest_ns();
-}
-
-// The move functions return true if the motor can be set to move
-// this way and false otherwise.
-boolean Motor::move_right() {
-  if ((moved_right + step_size) >= max_ew) { return false; }
-  digitalWrite(motor_EW,         HIGH);
-  digitalWrite(motor_EW_Reverse, LOW);
-  moved_right += time_delta();
+boolean Motor::forward() {
+  if ((travel + step_size) >= max_travel) return rest();
+  digitalWrite(forward_pin, HIGH);
+  digitalWrite(reverse_pin, LOW);
+  travel += time_delta();
   return true;
 }
 
-boolean Motor::move_left() {
-  if ((moved_right - step_size) < min_ew) { return false; }
-  digitalWrite(motor_EW,         LOW);
-  digitalWrite(motor_EW_Reverse, HIGH);
-  moved_right -= time_delta();
+boolean Motor::reverse() {
+  if ((travel - step_size) < min_travel) return rest();
+  digitalWrite(forward_pin, LOW);
+  digitalWrite(reverse_pin, HIGH);
+  travel -= time_delta();
   return true;
 }
 
-boolean Motor::move_up() {
-  if ((moved_up + step_size) >= max_ns) { return false; }
-  digitalWrite(motor_NS,         LOW);
-  digitalWrite(motor_NS_Reverse, HIGH);
-  moved_up += time_delta();
-  return true;
-}
-
-boolean Motor::move_down() {
-  if ((moved_up - step_size) < min_ns) { return false; }
-  digitalWrite(motor_NS,         HIGH);
-  digitalWrite(motor_NS_Reverse, LOW);
-  moved_up -= time_delta();
-  return true;
-}
-
-void Motor::move_to_default() {
-  while (move_left() || move_down()) { delay(step_size); }
+boolean Motor::rest() {
+  digitalWrite(forward_pin, LOW);
+  digitalWrite(reverse_pin, LOW);
+  return false;
 }

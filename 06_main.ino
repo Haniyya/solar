@@ -1,24 +1,29 @@
-Sensor Sen; // The solar sensor gets initialized
-Motor Mo; // The motor gets initialized
+SensorArray UdSensors = SensorArray(0, 3);
+SensorArray RlSensors = SensorArray(2, 1);
+Motor UdMotor         = Motor(9, 10, 30000, 500);
+Motor RlMotor         = Motor(7, 8, 33000, 800);
 
 void setup(){
-  Mo.set_pins();
-  Mo.move_to_default();
+  // If you change the pin setup, change this as well.
+  UdMotor.init();
+  RlMotor.init();
 }
 
 void loop() {
+  UdSensors.update_status();
+  RlSensors.update_status();
+  switch (UdSensors.status()) {
+    case lighter:   UdMotor.forward(); break;
+    case unchanged: UdMotor.rest(); break;
+    case darker:
+    case dark:      UdMotor.reverse(); break;
+  };
+  switch (RlSensors.status()) {
+    case lighter:   RlMotor.forward(); break;
+    case unchanged: RlMotor.rest(); break;
+    case darker:
+    case dark:      RlMotor.reverse(); break;
+  };
   update_running_time();
-  Sen.update_status();
-  switch (Sen.east_status()) {
-    case lighter:   Mo.move_right(); break;
-    case unchanged: Mo.rest_ew(); break;
-    case darker:    Mo.move_left(); break;
-  }
-  switch (Sen.north_status()) {
-    case lighter:   Mo.move_up(); break;
-    case unchanged: Mo.rest_ns(); break;
-    case darker:    Mo.move_down(); break;
-  }
-  if (Sen.is_dark()) { Mo.move_to_default(); }
   delay(step_size);
 }
